@@ -4,7 +4,6 @@ import re
 from ebooklib import epub
 from tqdm import tqdm
 import argparse
-
 from pathlib import Path
 
 def _convert_file_path(path):
@@ -13,30 +12,31 @@ def _convert_file_path(path):
     new_path = path_obj.with_name(new_name)
     return str(new_path)
 
-
 def convert_to_bionic_str(soup: BeautifulSoup, s: str):
     new_parent = soup.new_tag("span")
     words = re.split(r'.,;:!?-|\s', s)
     for word in words:
-        mid = (len(word) // 2) + 1
-        first_half, second_half = word[:mid], word[mid:]
-        b_tag = soup.new_tag("b")
-        b_tag.append(soup.new_string(first_half))
-        new_parent.append(b_tag)
-        new_parent.append(soup.new_string(second_half + " "))
-
+        if len(word) >= 4:  # Increase frequency by bolding words with length >= 4
+            mid = (len(word) // 2) + 1
+            first_half, second_half = word[:mid], word[mid:]
+            b_tag = soup.new_tag("b")
+            b_tag.append(soup.new_string(first_half))
+            new_parent.append(b_tag)
+            new_parent.append(soup.new_string(second_half + " "))
+        else:
+            new_parent.append(soup.new_string(word + " "))
     return new_parent
 
 def convert_to_bionic(content: str):
     soup = BeautifulSoup(content, 'html.parser')
     for e in soup.descendants:
         if isinstance(e, bs4.element.Tag):
-            if e.name == "b":
-                continue
-            children = list(e.children)
-            if len(children) == 1:
-                if len(children[0].text):
-                    children[0].replace_with(convert_to_bionic_str(soup, children[0].text))
+            if e.name == "p":  # Process all paragraphs
+                children = list(e.children)
+                for child in children:
+                    if isinstance(child, bs4.element.NavigableString):
+                        if len(child.text.strip()):
+                            child.replace_with(convert_to_bionic_str(soup, child.text))
     return str(soup).encode()
 
 def convert_book(book_path):
@@ -53,4 +53,3 @@ if __name__ == "__main__":
                         help='the path to the book file')
     args = parser.parse_args()
     convert_book(args.book_path)
-    # The path to the book file can now be accessed using `args.book_path`
