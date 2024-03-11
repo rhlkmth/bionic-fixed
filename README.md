@@ -1,3 +1,26 @@
+
+
+>Install Python
+>
+
+
+>"pip install beautifulsoup4 EbookLib soupsieve tqdm"
+
+
+
+
+
+> Run GUI file
+
+
+
+> Done
+
+
+> If you get an error , watch  this https://www.youtube.com/watch?v=jPRIzVZulhA
+
+
+-----------------------------------------------------------------
 # Convert to Bionic
 
 Convert to Bionic is a simple Python script that converts EPUB files to use Bionic Reading, a technique that can improve reading speed and comprehension.
